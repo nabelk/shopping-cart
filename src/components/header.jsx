@@ -4,7 +4,7 @@ import { faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 
 export function Header() {
     return (
-        <div className='flex items-center justify-between sticky top-0 px-12 py-4'>
+        <header className='flex items-center justify-between sticky z-50 top-0 px-12 py-4'>
             <h1 className='w-2/4 text-left'>BlissBloom</h1>
             <div className='flex w-2/4 justify-end gap-12 '>
                 <Link to='/'>Home</Link>
@@ -13,6 +13,6 @@ export function Header() {
                     <FontAwesomeIcon icon={faShoppingCart} />
                 </Link>
             </div>
-        </div>
+        </header>
     );
 }
