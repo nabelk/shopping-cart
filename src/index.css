@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-    /* outline: dashed 2px red; */
-}
-
 :root {
     font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
@@ -21,10 +17,8 @@
 
 body {
     margin: 0;
-    /* display: flex; */
     place-items: center;
     min-width: 320px;
-    /* width: 100vw; */
     min-height: 100vh;
     position: relative;
 }
@@ -63,7 +57,10 @@ header {
 }
 
 #home a,
-#shop button {
+#shop button,
+button.checkout,
+#cart a,
+#err-page a {
     color: #f8c90cf8;
     background-color: #5f4b32fd;
     border: solid 4px #5f4b32;
@@ -71,7 +68,10 @@ header {
 }
 
 #home a:hover,
-#shop button:hover {
+#shop button:hover,
+button.checkout:hover,
+#cart a:hover,
+#err-page a:hover {
     color: #f8c90cc1;
 }
 
@@ -85,7 +85,7 @@ button {
     cursor: pointer;
     transition: border-color 0.25s;
 }
-button:hover {
+button:not(.checkout):hover {
     border-color: initial;
 }
 button:focus,
