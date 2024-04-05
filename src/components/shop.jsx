@@ -3,7 +3,7 @@ import { PropTypes } from 'prop-types';
 import { fetchAPI } from '../api/api';
 import { Loading } from './loading';
 
-function ListItem({ productData }) {
+function ListItem({ productData, onClickChoosenProduct }) {
     const ratingStarsEle = [];
     const rating = Math.floor(productData.rating.rate);
     for (let i = 0; i < 5; i++) {
@@ -23,14 +23,12 @@ function ListItem({ productData }) {
 
     return (
         <div className='w-full bg-white border border-gray-200 rounded-lg shadow'>
-            <a href='#'>
-                <img
-                    className='p-8 rounded-t-lg mx-auto'
-                    style={{ height: '180px', width: '200px' }}
-                    src={productData.image}
-                    alt={productData.title}
-                />
-            </a>
+            <img
+                className='p-8 rounded-t-lg mx-auto'
+                style={{ height: '180px', width: '200px' }}
+                src={productData.image}
+                alt={productData.title}
+            />
             <div className='px-5 pb-5'>
                 <h5 className='font-semibold tracking-tight' style={{ height: '100px' }}>
                     {productData.title}
@@ -44,13 +42,15 @@ function ListItem({ productData }) {
                     </span>
                 </div>
                 <div className='flex items-center justify-between'>
-                    <span className='text-2xl font-bold'>$599</span>
-                    <a
-                        href='#'
-                        className='text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800'
+                    <span className='text-2xl font-bold'>
+                        RM {Math.round(productData.price * 3.5)}
+                    </span>
+                    <button
+                        onClick={() => onClickChoosenProduct(productData, !productData.isCart)}
+                        className='text-white bg-blue-700 hover:bg-blue-800  focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 '
                     >
-                        Add to cart
-                    </a>
+                        {!productData.isCart ? 'Add to cart' : 'Remove from cart'}
+                    </button>
                 </div>
             </div>
         </div>
@@ -64,20 +64,59 @@ ListItem.propTypes = {
         rating: PropTypes.shape({
             rate: PropTypes.number.isRequired,
         }).isRequired,
+        isCart: PropTypes.bool.isRequired,
+        price: PropTypes.number.isRequired,
     }).isRequired,
+    onClickChoosenProduct: PropTypes.func.isRequired,
 };
 
-export function Shop() {
+export function Shop({ manageChoosenProductInCart, choosenProductInCart }) {
     const [productsData, setProductsData] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    function setProducts(response) {
+        setProductsData(
+            response.map((data) => {
+                const checkIsProductInCart = choosenProductInCart.find(
+                    (item) => item.id === data.id,
+                );
+                if (checkIsProductInCart) {
+                    return {
+                        ...data,
+                        isCart: true,
+                    };
+                }
+                return {
+                    ...data,
+                    isCart: false,
+                };
+            }),
+        );
+    }
+
     useEffect(() => {
         fetchAPI('https://fakestoreapi.com/products')
-            .then((response) => setProductsData(response))
+            .then((response) => setProducts(response))
             .catch((err) => setError(err))
             .finally(() => setLoading(false));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    function manageProductInCart(item, isProductInCart) {
+        setProductsData(
+            [...productsData].map((product) => {
+                if (product.id === item.id) {
+                    return {
+                        ...product,
+                        isCart: isProductInCart,
+                    };
+                }
+                return product;
+            }),
+        );
+        manageChoosenProductInCart(item, isProductInCart);
+    }
 
     if (loading) return <Loading />;
     if (error)
@@ -85,11 +124,23 @@ export function Shop() {
 
     return (
         <div id='shop' className='py-8 px-6 md:py-14 sm:px-8 md:px-12 lg:px-24'>
+            <h1 className='text-left mb-5' style={{ fontSize: '1.8rem' }}>
+                Products
+            </h1>
             <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4'>
                 {productsData.map((product) => (
-                    <ListItem key={product.id} productData={product} />
+                    <ListItem
+                        key={product.id}
+                        onClickChoosenProduct={manageProductInCart}
+                        productData={product}
+                    />
                 ))}
             </div>
         </div>
     );
 }
+
+Shop.propTypes = {
+    choosenProductInCart: PropTypes.array.isRequired,
+    manageChoosenProductInCart: PropTypes.func.isRequired,
+};
